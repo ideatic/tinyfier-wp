@@ -1,0 +1,15 @@
+DirectoryIndex tinyfier.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # Rewrite URLs like "/tinyfier/..." to "/tinyfier/tinyfier.php?f=..."
+    RewriteRule ^(.*) tinyfier.php?f=$1 [L,NE]
+</IfModule>
+
+<IfModule mod_env.c>
+    # In case AddOutputFilterByType has been added
+    SetEnv no-gzip
+</IfModule>
