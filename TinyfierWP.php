@@ -223,6 +223,8 @@ class TinyfierWP {
         }
         return FALSE;
     }
+    
+    /* Install/Uninstall routines */
 
     private static function _get_paths(&$cache_dir, &$loader_path, &$tinyfier) {
         $cache_dir = WP_CONTENT_DIR . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'tinyfier'; //Store cache in wp-content/cache/tinyfier
