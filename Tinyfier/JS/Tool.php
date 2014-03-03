@@ -2,10 +2,8 @@
 
 /**
  * Compression and processing routines for Javascript code
- *
- * @package Tinyfier
  */
-abstract class TinyfierJS {
+abstract class Tinyfier_JS_Tool {
 
     /**
      * Compress javascript code

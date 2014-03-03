@@ -112,7 +112,7 @@ class TinyfierWP {
         //Minify HTML
         if ($this->minify_html) {
             require_once dirname(__FILE__) . '/tinyfier/html/html.php';
-            $buffer = TinyfierHTML::process($buffer, array(
+            $buffer = Tinyfier_HTML_Tool::process($buffer, array(
                         'external_services' => FALSE
             ));
         }
@@ -125,7 +125,6 @@ class TinyfierWP {
      * @param type $type
      */
     private function _find_assets($html, $type) {
-
         //Remove comments
         $html = preg_replace('~<!--.*?-->~s', '', $html);
 
@@ -143,8 +142,6 @@ class TinyfierWP {
         }
 
         $found = array();
-
-
 
         $matches = null;
         $pattern = '<(?<tag>' . implode('|', $tags) . ')(?<attrs>[^>]*?)(/>|>(?<content>.*?)</\k<tag>>)';
@@ -223,11 +220,11 @@ class TinyfierWP {
         }
         return FALSE;
     }
-    
+
     /* Install/Uninstall routines */
 
     private static function _get_paths(&$cache_dir, &$loader_path, &$tinyfier) {
-        $cache_dir = WP_CONTENT_DIR . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'tinyfier'; //Store cache in wp-content/cache/tinyfier
+        $cache_dir = WP_CONTENT_DIR . DIRECTORY_SEPARATOR . 'tinyfier-cache'; //Store cache in wp-content/cache/tinyfier
         $loader_path = WP_CONTENT_DIR . DIRECTORY_SEPARATOR . 'assets.php';
         $tinyfier = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'tinyfier' . DIRECTORY_SEPARATOR . 'tinyfier.php';
     }
