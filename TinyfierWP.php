@@ -97,7 +97,7 @@ class TinyfierWP {
                             $loader = '<script src="' . $url . '"></script>';
                         }
                     }
-                    $replacement = $loader . $asset['original'];
+                    $replacement = $loader . $replacement;
                     $join_queue = array();
                 }
 
@@ -184,7 +184,7 @@ class TinyfierWP {
 
         //Check if it is a stylesheet
         if ($mode == 'css') {
-            if (!isset($asset['attrs']['rel']) || stristr($asset['attrs']['rel'], 'stylesheet') === FALSE || (isset($asset['attrs']['media']) && stristr($asset['attrs']['media'], 'print') !== false)) {
+            if (!isset($asset['attrs']['rel']) || stristr($asset['attrs']['rel'], 'stylesheet') === FALSE || (isset($asset['attrs']['media']) && stristr($asset['attrs']['media'], 'print') !== FALSE)) {
                 return FALSE;
             }
         }
@@ -226,7 +226,7 @@ class TinyfierWP {
     private static function _get_paths(&$cache_dir, &$loader_path, &$tinyfier) {
         $cache_dir = WP_CONTENT_DIR . DIRECTORY_SEPARATOR . 'tinyfier-cache'; //Store cache in wp-content/cache/tinyfier
         $loader_path = WP_CONTENT_DIR . DIRECTORY_SEPARATOR . 'assets.php';
-        $tinyfier = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'tinyfier' . DIRECTORY_SEPARATOR . 'tinyfier.php';
+        $tinyfier = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'Tinyfier' . DIRECTORY_SEPARATOR . 'tinyfier.php';
     }
 
     public static function install() {
@@ -237,13 +237,33 @@ class TinyfierWP {
             mkdir($cache_dir, 0755);
         }
 
+        $error_path = WP_CONTENT_DIR . DIRECTORY_SEPARATOR . 'tinyfier_error.txt';
+
         $php = '<?php
 $src_folder = ' . var_export(get_home_path(), TRUE) . '; //Wordpress root path
 $cache_dir = ' . var_export($cache_dir, TRUE) . '; //Cache path
+$error_log = ' . var_export($error_path, TRUE) . '; //Error log path
 
 require ' . var_export($tinyfier, TRUE) . ';';
 
         file_put_contents($loader_path, $php);
+    }
+
+    /**
+     * Tinyfier must be the last plugin, in order to process the ob_ buffer
+     * before any other caching plugin
+     */
+    public static function set_plugin_order() {
+        // ensure path to this file is via main wp plugin path
+        $wp_path_to_this_file = preg_replace('/(.*)plugins\/(.*)$/', WP_PLUGIN_DIR . "/$2", __FILE__);
+        $this_plugin = plugin_basename(trim($wp_path_to_this_file));
+        $active_plugins = get_option('active_plugins');
+        $this_plugin_key = array_search($this_plugin, $active_plugins);
+        if ($this_plugin_key !== FALSE) {
+            array_splice($active_plugins, $this_plugin_key, 1);
+            array_push($active_plugins, $this_plugin);
+            update_option('active_plugins', $active_plugins);
+        }
     }
 
     public static function uninstall() {
@@ -272,8 +292,8 @@ require ' . var_export($tinyfier, TRUE) . ';';
 }
 
 $instance = new TinyfierWP();
-
 $instance->exec();
 
 register_activation_hook(__FILE__, array('TinyfierWP', 'install'));
 register_deactivation_hook(__FILE__, array('TinyfierWP', 'uninstall'));
+add_action('activated_plugin', array('TinyfierWP', 'set_plugin_order'));
